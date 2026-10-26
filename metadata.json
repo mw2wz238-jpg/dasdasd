@@ -1,0 +1,6 @@
+{
+  "name": "Project Vanguard — AAA Tactical FPS",
+  "description": "Profesjonalny taktyczny shooter 3D FPS z systemem Killstreaks (UAV, Airstrike, Predator), taktycznym wyposażeniem (Flashbang, Claymore, Defuse Kit), zaawansowaną balistyką z penetracją ścian i dynamicznymi efektami PBR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

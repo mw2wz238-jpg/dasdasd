@@ -1,0 +1,832 @@
+[Reasoning]
+The user attached a zip file and says: "Here is the whole project of my game, I want to expand it." I need to first inspect the zip to understand the project. Let me read the file. It's a zip — read_file may not handle zip. Let me try downloading/unzipping via bash? Bash works in /app. I can use bash to fetch the URL and unzip it.
+
+Let me do that.
+
+Sprawdzę najpierw, co dokładnie jest w paczce z Twoim projektem.
+
+### bash
+Arguments:
+{
+  "command": "cd /tmp && rm -rf vanguard && mkdir vanguard && cd vanguard && curl -sL -o p.zip \"https://media.base44.com/files/public/user_6ac94aee0ecdb079d34c96f3/6fbfdac8e_project_vanguard_fixed.zip\" && ls -la && unzip -o -q p.zip && find . -maxdepth 3 -type d | head -50 && echo \"---FILES---\" && find . -type f | head -100",
+  "summary": "Unpacking your game project | Unpacked your game project"
+}
+Result:
+(exit code 127)
+total 97
+drwxr-xr-x 1 root root    60 Oct 25 15:04 .
+drwxrwxrwt 1 root root   100 Oct 25 15:04 ..
+-rw-r--r-- 1 root root 98802 Oct 25 15:04 p.zip
+
+bash: line 1: unzip: command not found
+
+[Reasoning]
+No unzip. Try python? Maybe python3 available. Or use node's zlib... Actually exec_tool (Node sandbox) could unzip but it says don't edit code from there. Let me try `python3 -c` with zipfile.
+
+### bash
+Arguments:
+{
+  "command": "cd /tmp/vanguard && python3 -c \"\nimport zipfile\nz=zipfile.ZipFile('p.zip')\nz.extractall('.')\nfor n in z.namelist(): print(n)\n\" 2>&1 | head -120",
+  "summary": "Checking project structure | Checked project structure"
+}
+Result:
+project_vanguard_fixed/project_vanguard_full/
+project_vanguard_fixed/project_vanguard_full/src/
+project_vanguard_fixed/project_vanguard_full/src/types/
+project_vanguard_fixed/project_vanguard_full/src/types/game.ts
+project_vanguard_fixed/project_vanguard_full/src/components/
+project_vanguard_fixed/project_vanguard_full/src/components/GunsmithModal.tsx
+project_vanguard_fixed/project_vanguard_full/src/components/GameOverModal.tsx
+project_vanguard_fixed/project_vanguard_full/src/components/TitleScreen.tsx
+project_vanguard_fixed/project_vanguard_full/src/components/HUD.tsx
+project_vanguard_fixed/project_vanguard_full/src/components/BuyMenu.tsx
+project_vanguard_fixed/project_vanguard_full/src/components/MapSelectModal.tsx
+project_vanguard_fixed/project_vanguard_full/src/components/Scoreboard.tsx
+project_vanguard_fixed/project_vanguard_full/src/App.tsx
+project_vanguard_fixed/project_vanguard_full/src/index.css
+project_vanguard_fixed/project_vanguard_full/src/engine/
+project_vanguard_fixed/project_vanguard_full/src/engine/simulation.ts
+project_vanguard_fixed/project_vanguard_full/src/engine/environment.ts
+project_vanguard_fixed/project_vanguard_full/src/engine/particles.ts
+project_vanguard_fixed/project_vanguard_full/src/engine/weapons.ts
+project_vanguard_fixed/project_vanguard_full/src/engine/audio.ts
+project_vanguard_fixed/project_vanguard_full/src/engine/player.ts
+project_vanguard_fixed/project_vanguard_full/src/engine/materials.ts
+project_vanguard_fixed/project_vanguard_full/src/main.tsx
+project_vanguard_fixed/project_vanguard_full/eslint.config.js
+project_vanguard_fixed/project_vanguard_full/public/
+project_vanguard_fixed/project_vanguard_full/public/assets/
+project_vanguard_fixed/project_vanguard_full/README.md
+project_vanguard_fixed/project_vanguard_full/index.html
+project_vanguard_fixed/project_vanguard_full/vite.config.ts
+project_vanguard_fixed/project_vanguard_full/.gitignore
+project_vanguard_fixed/project_vanguard_full/package.json
+project_vanguard_fixed/project_vanguard_full/metadata.json
+project_vanguard_fixed/project_vanguard_full/.env.example
+project_vanguard_fixed/project_vanguard_full/bun.lock
+project_vanguard_fixed/project_vanguard_full/tsconfig.json
+project_vanguard_fixed/
+
+[Reasoning]
+Let me read the key files: README.md, metadata.json, package.json, App.tsx, types/game.ts, and engine files sizes.
+
+### bash
+Arguments:
+{
+  "command": "cd /tmp/vanguard/project_vanguard_fixed/project_vanguard_full && cat README.md && echo \"===METADATA===\" && cat metadata.json && echo \"===PKG===\" && cat package.json && echo \"===SIZES===\" && find src -type f | xargs wc -l | sort -n",
+  "summary": "Reading project overview | Read project overview"
+}
+Result:
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
+
+# Run and deploy your AI Studio app
+
+This contains everything you need to run your app locally.
+
+View your app in AI Studio: https://ai.studio/apps/d8532480-f4f0-443a-846d-14afde6b49ba
+
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
+===METADATA===
+{
+  "name": "Project Vanguard — AAA Tactical FPS",
+  "description": "Profesjonalny, komercyjny taktyczny shooter 3D FPS z autorytatywnym cyklem rund (Buy, Live, Combat, Spectator, Round End, Rewards), systemem uzbrojenia Gunsmith, grafiką PBR WebGL2 i zaawansowanym AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+===PKG===
+{
+  "name": "react-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "clean": "rm -rf dist",
+    "lint": "tsc --noEmit",
+    "lint:eslint": "eslint ."
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "canvas-confetti": "^1.9.4",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "three": "^0.186.1",
+    "vite": "^8.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.14.0",
+    "@eslint/js": "^9.14.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.11.0",
+    "typescript-eslint": "^8.13.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2"
+  }
+}
+===SIZES===
+     1 src/index.css
+     5 src/main.tsx
+   109 src/components/MapSelectModal.tsx
+   110 src/components/TitleScreen.tsx
+   125 src/components/GameOverModal.tsx
+   141 src/components/Scoreboard.tsx
+   163 src/types/game.ts
+   221 src/components/BuyMenu.tsx
+   310 src/engine/materials.ts
+   319 src/engine/particles.ts
+   380 src/components/GunsmithModal.tsx
+   383 src/engine/player.ts
+   458 src/components/HUD.tsx
+   495 src/engine/weapons.ts
+   569 src/engine/audio.ts
+   644 src/App.tsx
+   701 src/engine/environment.ts
+  1493 src/engine/simulation.ts
+  6627 total
+
+[Reasoning]
+Let me read App.tsx and types/game.ts, plus simulation.ts overview. This is a Three.js FPS game. It's a substantial project (~6600 lines).
+
+The user says: "here's the whole project of my game, I want to expand it." Very vague — what expansion? I should read enough to understand the game, then ask a clarifying question about what kind of expansion. But per first_message_questions, ask the single most important question.
+
+Let me read the core files first to understand.
+
+### bash
+Arguments:
+{
+  "command": "cd /tmp/vanguard/project_vanguard_fixed/project_vanguard_full && cat src/types/game.ts && echo \"=====APP=====\" && cat src/App.tsx",
+  "summary": "Reading game core logic | Read game core logic"
+}
+Result:
+export type RoundState = 
+  | 'WARMUP'
+  | 'BUY_PHASE'
+  | 'EQUIPMENT_LOCK'
+  | 'LIVE_COMBAT'
+  | 'BOMB_PLANTED'
+  | 'ROUND_END'
+  | 'REWARDS'
+  | 'MATCH_END';
+
+export type Team = 'VANGUARD' | 'SYNDICATE'; // Blue (Counter-Terror / Defense) vs Red (Terror / Attack)
+
+export type MapId = 'industrial' | 'winter_village' | 'night_docks';
+
+export interface BombSite {
+  id: 'A' | 'B';
+  position: { x: number; y: number; z: number };
+  radius: number;
+}
+
+export interface PlantedBomb {
+  position: { x: number; y: number; z: number };
+  site: 'A' | 'B';
+  plantedAt: number;
+  timerSec: number;
+  defuseProgress: number; // 0 to 1
+  defusingCombatantId: string | null;
+  isDefused: boolean;
+  isExploded: boolean;
+}
+
+export interface WeaponAttachmentConfig {
+  sight: 'ironsight' | 'reddot' | 'holographic' | 'acog_scope';
+  barrel: 'standard' | 'suppressed' | 'heavy_long';
+  magazine: 'standard' | 'extended' | 'drum';
+  stock: 'tactical' | 'heavy' | 'lightweight';
+  grip: 'none' | 'vertical' | 'angled';
+  camo: 'military_black' | 'desert_tan' | 'arctic_snow' | 'carbon_gold';
+}
+
+export interface WeaponStats {
+  id: string;
+  name: string;
+  category: 'rifle' | 'sniper' | 'smg' | 'shotgun' | 'pistol';
+  price: number;
+  damage: number;
+  headshotMultiplier: number;
+  fireRateRPM: number;
+  magSize: number;
+  reserveAmmo: number;
+  reloadTimeSec: number;
+  spreadNormal: number;
+  spreadAds: number;
+  recoilVertical: number;
+  recoilHorizontal: number;
+  rangeMeters: number;
+  bulletSpeed: number;
+  killReward: number;
+}
+
+export interface PlayerInventory {
+  primary: WeaponStats | null;
+  secondary: WeaponStats;
+  primaryAttachments: WeaponAttachmentConfig;
+  knife: boolean;
+  armor: number; // 0 - 100
+  helmet: boolean;
+  fragGrenades: number;
+  smokeGrenades: number;
+  flashbangs: number;
+  claymores: number;
+  hasDefuseKit: boolean;
+  cash: number;
+}
+
+export type KillstreakType = 'UAV' | 'AIRSTRIKE' | 'PREDATOR';
+
+export interface Combatant {
+  id: string;
+  name: string;
+  team: Team;
+  isPlayer: boolean;
+  isAlive: boolean;
+  hp: number;
+  maxHp: number;
+  armor: number;
+  hasHelmet: boolean;
+  hasDefuseKit: boolean;
+  flashbangs: number;
+  claymores: number;
+  currentStreak: number;
+  isFlashedUntil: number; // timestamp ms
+  deathImpulse?: { x: number; y: number; z: number };
+  weapon: WeaponStats;
+  currentMag: number;
+  reserveAmmo: number;
+  kills: number;
+  deaths: number;
+  assists: number;
+  damageDealt: number;
+  mvpStars: number;
+  cash: number;
+  pos: { x: number; y: number; z: number };
+  yaw: number;
+  pitch: number;
+  role: 'assaulter' | 'sniper' | 'shield' | 'juggernaut';
+}
+
+export interface ClaymoreMine {
+  id: string;
+  ownerId: string;
+  ownerTeam: Team;
+  pos: { x: number; y: number; z: number };
+  yaw: number;
+  isArmed: boolean;
+  armedAt: number;
+}
+
+export interface ActiveAirStrike {
+  id: string;
+  targetPos: { x: number; z: number };
+  ownerTeam: Team;
+  startTime: number;
+  strikesCompleted: number;
+  totalStrikes: number;
+}
+
+export interface RadioCallout {
+  id: string;
+  speakerName: string;
+  team: Team;
+  text: string;
+  type: 'grenade' | 'flashbang' | 'reloading' | 'enemy_spotted' | 'bomb_planted' | 'bomb_defused' | 'uav_online' | 'airstrike_incoming';
+  timestamp: number;
+}
+
+export interface KillfeedEntry {
+  id: string;
+  killerName: string;
+  killerTeam: Team;
+  victimName: string;
+  victimTeam: Team;
+  weaponName: string;
+  isHeadshot: boolean;
+  timestamp: number;
+}
+
+export interface SmokeCloud {
+  id: string;
+  position: { x: number; y: number; z: number };
+  radius: number;
+  createdAt: number;
+  durationSec: number;
+}
+
+export interface EconomyLedgerRecord {
+  transactionId: string;
+  playerId: string;
+  type: 'BUY_WEAPON' | 'BUY_ARMOR' | 'BUY_GRENADE' | 'BUY_TACTICAL' | 'BUY_DEFUSE_KIT' | 'ROUND_WIN' | 'ROUND_LOSS' | 'KILL_REWARD';
+  amount: number;
+  timestamp: number;
+  resultingBalance: number;
+}
+=====APP=====
+import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { MapId, RoundState, WeaponStats, WeaponAttachmentConfig, Combatant } from './types/game';
+import { Materials } from './engine/materials';
+import { EnvironmentBuilder } from './engine/environment';
+import { ParticleSystem } from './engine/particles';
+import { SimulationEngine } from './engine/simulation';
+import { PlayerController } from './engine/player';
+import { Sound } from './engine/audio';
+import { WEAPON_REGISTRY, DEFAULT_ATTACHMENTS } from './engine/weapons';
+
+import { TitleScreen } from './components/TitleScreen';
+import { HUD } from './components/HUD';
+import { BuyMenu } from './components/BuyMenu';
+import { Scoreboard } from './components/Scoreboard';
+import { GunsmithModal } from './components/GunsmithModal';
+import { MapSelectModal } from './components/MapSelectModal';
+import { GameOverModal } from './components/GameOverModal';
+
+export default function App() {
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  // High-level App State with ref to avoid stale closures in animation loop
+  const [gameState, setGameState] = useState<'TITLE' | 'PLAYING' | 'GAMEOVER'>('TITLE');
+  const gameStateRef = useRef<'TITLE' | 'PLAYING' | 'GAMEOVER'>('TITLE');
+  const [currentMap, setCurrentMap] = useState<MapId>('industrial');
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  // Modals
+  const [isBuyMenuOpen, setIsBuyMenuOpen] = useState<boolean>(false);
+  const [isScoreboardOpen, setIsScoreboardOpen] = useState<boolean>(false);
+  const [isGunsmithOpen, setIsGunsmithOpen] = useState<boolean>(false);
+  const [isMapSelectOpen, setIsMapSelectOpen] = useState<boolean>(false);
+
+  // HUD and Round State
+  const [roundState, setRoundState] = useState<RoundState>('BUY_PHASE');
+  const [roundTimer, setRoundTimer] = useState<number>(15);
+  const [roundNumber, setRoundNumber] = useState<number>(1);
+  const [scoreVanguard, setScoreVanguard] = useState<number>(0);
+  const [scoreSyndicate, setScoreSyndicate] = useState<number>(0);
+
+  // Player & Combat state for UI
+  const [playerCombatant, setPlayerCombatant] = useState<Combatant | null>(null);
+  const [combatantsList, setCombatantsList] = useState<Combatant[]>([]);
+  const [isAds, setIsAds] = useState<boolean>(false);
+  const [hitmarker, setHitmarker] = useState<{ active: boolean; isHeadshot: boolean } | null>(null);
+  const [damageDirection, setDamageDirection] = useState<number | null>(null);
+  const [spectatorTarget, setSpectatorTarget] = useState<Combatant | null>(null);
+
+  // Bomb Objective State for UI
+  const [isNearSiteA, setIsNearSiteA] = useState<boolean>(false);
+  const [isNearSiteB, setIsNearSiteB] = useState<boolean>(false);
+  const [isNearPlantedBomb, setIsNearPlantedBomb] = useState<boolean>(false);
+  const [plantProgress, setPlantProgress] = useState<number>(0);
+  const [defuseProgress, setDefuseProgress] = useState<number>(0);
+
+  // Weapon customization
+  const [customAttachments, setCustomAttachments] = useState<WeaponAttachmentConfig>({ ...DEFAULT_ATTACHMENTS });
+
+  // Engine references kept across re-renders
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const simRef = useRef<SimulationEngine | null>(null);
+  const playerRef = useRef<PlayerController | null>(null);
+  const envBuilderRef = useRef<EnvironmentBuilder>(new EnvironmentBuilder());
+  const particlesRef = useRef<ParticleSystem | null>(null);
+
+  const spawnsVanguardRef = useRef<THREE.Vector3[]>([]);
+  const spawnsSyndicateRef = useRef<THREE.Vector3[]>([]);
+
+  const setGameStateSafe = (state: 'TITLE' | 'PLAYING' | 'GAMEOVER') => {
+    gameStateRef.current = state;
+    setGameState(state);
+  };
+
+  // Initialize Three.js WebGL & Simulation Engine once
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // Detect software GL
+    const isSoftwareGl = (() => {
+      const gl = document.createElement('canvas').getContext('webgl2');
+      if (!gl) return true;
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      const param = ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER;
+      const gpu = String(gl.getParameter(param));
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      return /SwiftShader|llvmpipe|softpipe|Software|Basic ******(gpu);
+    })();
+
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 800);
+    cameraRef.current = camera;
+    scene.add(camera);
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: !isSoftwareGl,
+      powerPreference: 'high-performance',
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    renderer.shadowMap.enabled = !isSoftwareGl;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    canvasRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // Studio Environment lighting reflection
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmremGenerator.dispose();
+
+    // Particle system
+    const particles = new ParticleSystem(scene);
+    particlesRef.current = particles;
+
+    // Simulation Engine
+    const sim = new SimulationEngine(scene, particles);
+    simRef.current = sim;
+
+    // Environment build
+    const envData = envBuilderRef.current.buildMap(scene, currentMap);
+    sim.colliders = envData.colliders;
+    sim.bombSiteA = envData.bombSiteA;
+    sim.bombSiteB = envData.bombSiteB;
+    spawnsVanguardRef.current = envData.spawnPointsVanguard;
+    spawnsSyndi...
+
+[Reasoning]
+I need to see more, but I have a good picture: a 3D tactical FPS in Three.js, single-player vs bots, round-based, bomb objective, buy menu, gunsmith, maps.
+
+The user wants to expand the game but hasn't said how. This is the first message of conversation with no app built. Per instructions, I should ask the single most important clarifying question about what kind of expansion.
+
+But maybe I should first understand more of the game to ask good questions. Let me read the rest of App.tsx and skim simulation.ts to know features. Let me read remaining files quickly to know the current feature set so options are grounded.
+
+Actually, asking well requires knowing what exists. Let me read the rest of App.tsx and skim key parts of simulation.ts (round flow, bot AI, killstreaks).
+
+### bash
+Arguments:
+{
+  "command": "cd /tmp/vanguard/project_vanguard_fixed/project_vanguard_full && sed -n '100,644p' src/App.tsx",
+  "summary": "Reading game flow | Reading game flow"
+}
+Result:
+const renderer = new THREE.WebGLRenderer({
+      antialias: !isSoftwareGl,
+      powerPreference: 'high-performance',
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    renderer.shadowMap.enabled = !isSoftwareGl;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    canvasRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // Studio Environment lighting reflection
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmremGenerator.dispose();
+
+    // Particle system
+    const particles = new ParticleSystem(scene);
+    particlesRef.current = particles;
+
+    // Simulation Engine
+    const sim = new SimulationEngine(scene, particles);
+    simRef.current = sim;
+
+    // Environment build
+    const envData = envBuilderRef.current.buildMap(scene, currentMap);
+    sim.colliders = envData.colliders;
+    sim.bombSiteA = envData.bombSiteA;
+    sim.bombSiteB = envData.bombSiteB;
+    spawnsVanguardRef.current = envData.spawnPointsVanguard;
+    spawnsSyndicateRef.current = envData.spawnPointsSyndicate;
+
+    // Player Controller
+    const playerCtrl = new PlayerController(camera, sim);
+    playerRef.current = playerCtrl;
+
+    // Init 5v5 Match
+    sim.initMatch(currentMap, envData.spawnPointsVanguard, envData.spawnPointsSyndicate);
+
+    // Callbacks for HUD
+    sim.onStateChange = (state) => {
+      setRoundState(state);
+      if (state === 'MATCH_END') {
+        setGameStateSafe('GAMEOVER');
+        document.exitPointerLock?.();
+      }
+    };
+    sim.onScoreChange = (vg, sy) => {
+      setScoreVanguard(vg);
+      setScoreSyndicate(sy);
+    };
+    sim.onHitConfirmed = (isHeadshot) => {
+      setHitmarker({ active: true, isHeadshot });
+      setTimeout(() => setHitmarker(null), 180);
+    };
+    sim.onPlayerDamaged = (hp, attackerPos) => {
+      if (cameraRef.current) {
+        const toAttacker = attackerPos.clone().sub(cameraRef.current.position);
+        toAttacker.y = 0;
+        toAttacker.normalize();
+        const camDir = new THREE.Vector3();
+        cameraRef.current.getWorldDirection(camDir);
+        camDir.y = 0;
+        camDir.normalize();
+
+        const angle = Math.atan2(
+          toAttacker.x * camDir.z - toAttacker.z * camDir.x,
+          toAttacker.x * camDir.x + toAttacker.z * camDir.z
+        );
+        setDamageDirection(angle);
+        setTimeout(() => setDamageDirection(null), 600);
+      }
+    };
+
+    // 60fps Game Simulation Loop using ref to guarantee fresh state
+    let animId = 0;
+    let lastTime = performance.now();
+    let titleAngle = 0;
+
+    // The Three.js scene renders every frame regardless, but the React-driven
+    // HUD doesn't need to re-render 60x/sec: pushing a fresh combatant array
+    // and a fresh player-combatant object into setState every single frame
+    // forces a full HUD/Scoreboard re-render on every tick even when nothing
+    // the player can see has changed. 30Hz is imperceptible for HUD readouts
+    // (ammo, HP, timer, plant/defuse progress) and halves React's work.
+    const UI_SYNC_INTERVAL = 1 / 30;
+    let uiSyncAccumulator = 0;
+
+    const gameLoop = (now: number) => {
+      const rawDt = (now - lastTime) / 1000;
+      lastTime = now;
+      const dt = Math.min(rawDt, 0.05);
+
+      if (simRef.current && playerRef.current) {
+        if (gameStateRef.current === 'PLAYING') {
+          simRef.current.update(dt);
+          playerRef.current.update(dt);
+
+          uiSyncAccumulator += dt;
+          if (uiSyncAccumulator >= UI_SYNC_INTERVAL) {
+            uiSyncAccumulator = 0;
+
+            // Update HUD state values
+            setRoundTimer(simRef.current.roundTimer);
+            setRoundNumber(simRef.current.roundNumber);
+            if (simRef.current.playerRef) {
+              setPlayerCombatant({ ...simRef.current.playerRef });
+            }
+            setCombatantsList(Array.from(simRef.current.combatants.values()));
+
+            // Check proximity to Bomb Sites & Planted Bomb
+            const pPos = playerRef.current.pos;
+            const sA = simRef.current.bombSiteA;
+            const sB = simRef.current.bombSiteB;
+            const nearA = Math.hypot(pPos.x - sA.position.x, pPos.z - sA.position.z) <= sA.radius;
+            const nearB = Math.hypot(pPos.x - sB.position.x, pPos.z - sB.position.z) <= sB.radius;
+            setIsNearSiteA(nearA);
+            setIsNearSiteB(nearB);
+
+            if (simRef.current.plantedBomb) {
+              const bPos = simRef.current.plantedBomb.position;
+              const nearBomb = Math.hypot(pPos.x - bPos.x, pPos.z - bPos.z) <= 3.5;
+              setIsNearPlantedBomb(nearBomb);
+            } else {
+              setIsNearPlantedBomb(false);
+            }
+
+            setPlantProgress(simRef.current.plantProgress);
+            setDefuseProgress(simRef.current.defuseProgress);
+
+            // Update spectator target
+            if (simRef.current.playerRef && !simRef.current.playerRef.isAlive) {
+              const aliveAllies = Array.from(simRef.current.combatants.values()).filter(
+                (c) => c.isAlive && c.team === 'VANGUARD'
+              );
+              if (aliveAllies.length > 0) {
+                setSpectatorTarget(aliveAllies[playerRef.current.spectatorIndex % aliveAllies.length]);
+              } else {
+                setSpectatorTarget(null);
+              }
+            }
+          }
+        } else if (gameStateRef.current === 'TITLE') {
+          // Atmospheric live-world cinematic camera pan only on Title Screen
+          titleAngle += dt * 0.15;
+          camera.position.set(Math.cos(titleAngle) * 55, 14, Math.sin(titleAngle) * 55);
+          camera.lookAt(0, 4, 0);
+        }
+
+        particles.update(dt);
+      }
+
+      renderer.render(scene, camera);
+      animId = requestAnimationFrame(gameLoop);
+    };
+
+    animId = requestAnimationFrame(gameLoop);
+
+    // Window Resize Handler
+    const handleResize = () => {
+      if (!cameraRef.current || !rendererRef.current) return;
+      cameraRef.current.aspect = window.innerWidth / window.innerHeight;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+      renderer.dispose();
+      if (canvasRef.current && renderer.domElement) {
+        canvasRef.current.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  // Reload map when currentMap changes
+  useEffect(() => {
+    if (!sceneRef.current || !simRef.current || !playerRef.current) return;
+    const envData = envBuilderRef.current.buildMap(sceneRef.current, currentMap);
+    simRef.current.colliders = envData.colliders;
+    simRef.current.bombSiteA = envData.bombSiteA;
+    simRef.current.bombSiteB = envData.bombSiteB;
+    spawnsVanguardRef.current = envData.spawnPointsVanguard;
+    spawnsSyndicateRef.current = envData.spawnPointsSyndicate;
+
+    simRef.current.initMatch(currentMap, envData.spawnPointsVanguard, envData.spawnPointsSyndicate);
+    playerRef.current.pos.copy(envData.spawnPointsVanguard[2]);
+    playerRef.current.setupWeaponModel();
+  }, [currentMap]);
+
+  // Input Event Handlers
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Tab') {
+        e.preventDefault();
+        setIsScoreboardOpen((prev) => !prev);
+        return;
+      }
+
+      if (e.code === 'KeyB') {
+        if (gameStateRef.current === 'PLAYING' && roundState === 'BUY_PHASE') {
+          setIsBuyMenuOpen((prev) => !prev);
+          if (!isBuyMenuOpen) document.exitPointerLock?.();
+          return;
+        }
+      }
+
+      if (e.code === 'Escape') {
+        if (isBuyMenuOpen) {
+          setIsBuyMenuOpen(false);
+          return;
+        }
+        if (isGunsmithOpen) {
+          setIsGunsmithOpen(false);
+          return;
+        }
+        if (isMapSelectOpen) {
+          setIsMapSelectOpen(false);
+          return;
+        }
+        if (gameStateRef.current === 'PLAYING') {
+          setGameStateSafe('TITLE');
+          document.exitPointerLock?.();
+          return;
+        }
+      }
+
+      if (gameStateRef.current !== 'PLAYING') return;
+
+      if (playerRef.current) {
+        playerRef.current.keys[e.code] = true;
+
+        if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+          playerRef.current.isSprinting = true;
+        }
+        if (e.code === 'KeyC' || e.code === 'ControlLeft') {
+          if (playerRef.current.isSprinting && playerRef.current.isGrounded) {
+            playerRef.current.isSliding = true;
+            playerRef.current.slideTimer = 0.85;
+          } else {
+            playerRef.current.isCrouching = !playerRef.current.isCrouching;
+          }
+        }
+        if (e.code === 'Space') {
+          if (playerCombatant?.isAlive) {
+            if (playerRef.current.isGrounded) {
+              playerRef.current.vel.y = 8.5;
+              playerRef.current.isGrounded = false;
+              Sound.playFootstep('concrete');
+            }
+          } else {
+            playerRef.current.cycleSpectatorTarget();
+          }
+        }
+        if (e.code === 'KeyR') {
+          playerRef.current.startReload();
+        }
+        if (e.code === 'KeyY' || e.code === 'KeyI') {
+          // Trigger Weapon Inspection
+          playerRef.current.triggerInspect();
+        }
+        if (e.code === 'KeyG') {
+          // Toss Frag Grenade
+          if (cameraRef.current && simRef.current && playerRef.current) {
+            const dir = new THREE.Vector3();
+            cameraRef.current.getWorldDirection(dir);
+            simRef.current.throwGr...
+
+[Reasoning]
+I have a solid understanding. Now — the user wants to "expand" the game. This is too vague; asking is the right call. Options should explore genuinely different expansion directions relevant to an FPS:
+
+1. More content: new maps/weapons/game modes (e.g. Team Deathmatch, Free-for-All, hostage rescue) — content expansion.
+2. Progression & meta: XP, levels, unlocks, persistent player profile across matches.
+3. Online multiplayer vs real players? That's a huge ask — and would be a real technical claim; Base44 can do multiplayer with actors (realtime rooms)! But that's heavy. Could still be an option.
+4. Polish/presentation: menu, settings, difficulty, more immersive audio.
+
+Best single question: what kind of expansion — more content (maps/weapons/modes), progression system, or online multiplayer? Multi-select maybe? They said "rozbudować" (expand). Options must be genuinely different. Let me use ask_clarifying_questions with 1 question, 3 options, multi_select false? Actually expansion directions could be multiple... but first version needs focus. I'd use multi_select: true to let them pick what they want? Hmm, "Each question should settle one product decision". Multi-select for feature sets is allowed. But then options that can combine → multi_select true. I think a single-choice question about primary direction is cleaner, since building all at once isn't feasible.
+
+Actually I think one question: "Co ma być najważniejsze w tej rozbudowie?" with options:
+- "Więcej treści: mapy, bronie, tryby" (Team Deathmatch, nowe mapy, arsenał)
+- "Progresja gracza: poziomy i odblokowania" (XP, rangi, skórki między meczami)
+- "Gra online z innymi graczami" (prawdziwi przeciwnicy zamiast botów)
+
+And also maybe mention that I'd need to know which. Single select, 3 options. Language: Polish.
+
+Note: this is first message with no app in Base44 — the code from zip is not in the app yet. I'd need to port the project into Base44 (three.js is available). But before building, ask.
+
+Should I mention anything before asking? Keep it minimal. Per first_message_questions: use ask_clarifying_questions with exactly one question, end turn.
+
+Let me ask. Options should be grounded in the actual game features I read: 5v5 bots, bomb plant/defuse, buy menu, gunsmith attachments, 3 maps, killstreaks (UAV, airstrike, predator), economy.
+
+I'll craft one question with 3 options.
+
+Projekt to zaawansowany taktyczny FPS 3D (5v5 z botami, bomba, sklep, gunsmith, trzy mapy) — zanim zacznę go rozbudowywać, muszę wiedzieć, w którą stronę.
+
+### ask_clarifying_questions
+Arguments:
+{
+  "questions": [
+    {
+      "type": "text",
+      "question": "Co ma być głównym kierunkiem rozbudowy gry?",
+      "options": [
+        {
+          "label": "Więcej treści",
+          "description": "Nowe tryby (np. Deathmatch), nowe mapy i bronie do arsenału"
+        },
+        {
+          "label": "Progresja gracza",
+          "description": "Poziomy, XP, odblokowywane bronie i statystyki między meczami"
+        },
+        {
+          "label": "Gra online",
+          "description": "Prawdziwi gracze zamiast botów, wspólne mecze na serwerze"
+        }
+      ],
+      "multi_select": false
+    }
+  ]
+}
+Result:
+tool call approved by the user. results: User provided the following clarifications:
+- Co ma być głównym kierunkiem rozbudowy gry?: Rozbudowa Wizualna, dopracowanie map na poziom AAA, Teksturowanie PBR, HDR i wszystko co niezbędne do osiągnięcia wyglądu na poziomie komercyjnym
+
+---
+Questions already asked (do not repeat these):
+1. Co ma być głównym kierunkiem rozbudowy gry?
+Reassess (question 1 of at most 4): if any part of the first version would still be a guess (who it's for and why, what they see first, what it must let them do, what makes it theirs rather than a template, or a choice this kind of product can't leave open), ask the single most important one next. Otherwise tell the user your short build plan before calling any build tools.
